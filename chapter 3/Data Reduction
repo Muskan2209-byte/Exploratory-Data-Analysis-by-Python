@@ -1,0 +1,40 @@
+Step 3: Data Reduction
+Some columns or variables can be dropped if they do not add value to our analysis.
+
+In our dataset, the column S.No have only ID values, assuming they don’t have any predictive power to predict the dependent variable
+# Remove S.No. column from data
+data = data.drop(['S.No.'], axis = 1)
+data.info()
+
+Step 4: Creating Features
+We will play around with the variables Year and Name in our dataset. If we see the sample data, the column “Year” shows the manufacturing year of the car.
+It would be difficult to find the car’s age if it is in year format as the Age of the car is a contributing factor to Car Price. 
+Introducing a new column, “Car_Age” to know the age of the car
+from datetime import date
+date.today().year
+data['Car_Age']=date.today().year-data['Year']
+data.head()
+
+Let’s split the name and introduce new variables “Brand” and “Model”
+data['Brand'] = data.Name.str.split().str.get(0)
+data['Model'] = data.Name.str.split().str.get(1) + data.Name.str.split().str.get(2)
+data[['Name','Brand','Model']]
+
+Step 5: Data Cleaning/Wrangling
+Some names of the variables are not relevant and not easy to understand. Some data may have data entry errors, and some variables may need data type conversion. We need to fix this issue in the data.
+In the example, The brand name ‘Isuzu’ ‘ISUZU’ and ‘Mini’ and ‘Land’ looks incorrect. This needs to be corrected
+print(data.Brand.unique())
+print(data.Brand.nunique())
+
+searchfor = ['Isuzu' ,'ISUZU','Mini','Land']
+data[data.Brand.str.contains('|'.join(searchfor))].head(5)
+
+data["Brand"].replace({"ISUZU": "Isuzu", "Mini": "Mini Cooper","Land":"Land Rover"}, inplace=True)
+
+Step 6: EDA Exploratory Data Analysis
+Exploratory Data Analysis refers to the crucial process of performing initial investigations on data to discover patterns to check assumptions with the help of summary statistics and graphical representations.
+
+EDA can be leveraged to check for outliers, patterns, and trends in the given data.
+EDA helps to find meaningful patterns in data.
+EDA provides in-depth insights into the data sets to solve our business problems.
+EDA gives a clue to impute missing values in the dataset 
