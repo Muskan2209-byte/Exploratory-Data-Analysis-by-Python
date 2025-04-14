@@ -70,3 +70,106 @@ for col in num_cols:
     plt.subplot(1, 2, 2)
     sns.boxplot(x=data[col])
     plt.show()
+
+Step 9: Data Transformation
+Before we proceed to Bi-variate Analysis, Univariate analysis demonstrated the data pattern as some variables to be transformed.
+Price and Kilometer-Driven variables are highly skewed and on a larger scale. Let’s do log transformation.
+Log transformation can help in normalization, so this variable can maintain standard scale with other variables:
+
+# Function for log transformation of the column
+def log_transform(data,col):
+    for colname in col:
+        if (data[colname] == 1.0).all():
+            data[colname + '_log'] = np.log(data[colname]+1)
+        else:
+            data[colname + '_log'] = np.log(data[colname])
+    data.info()
+
+log_transform(data,['Kilometers_Driven','Price'])
+#Log transformation of the feature 'Kilometers_Driven'
+sns.distplot(data["Kilometers_Driven_log"], axlabel="Kilometers_Driven_log");
+
+Step 11: EDA Bivariate Analysis
+Now, let’s move ahead with bivariate analysis. Bivariate Analysis helps to understand how variables are related to each other and the relationship between dependent and independent variables present in the dataset.
+For numerical variables, you can widely use pair plots and scatter plots to perform bivariate analysis.
+We can use a stacked bar chart for categorical variables when the output variable is a classifier. Use bar plots if the output variable is continuous.
+In our example, we use a pair plot to show the relationship between two categorical variables.
+
+plt.figure(figsize=(13,17))
+sns.pairplot(data=data.drop(['Kilometers_Driven','Price'],axis=1))
+plt.show()
+
+Pair Plot provides below insights:
+
+The variable Year has a positive correlation with price and mileage
+A year has a Negative correlation with kilometers-Driven
+Mileage is negatively correlated with Power
+As power increases, mileage decreases
+Car with recent make is higher at prices. As the age of the car increases price decreases
+Engine and Power increase, and the price of the car increases
+A bar plot can be used to show the relationship between Categorical variables and continuous variables 
+
+fig, axarr = plt.subplots(4, 2, figsize=(12, 18))
+data.groupby('Location')['Price_log'].mean().sort_values(ascending=False).plot.bar(ax=axarr[0][0], fontsize=12)
+axarr[0][0].set_title("Location Vs Price", fontsize=18)
+data.groupby('Transmission')['Price_log'].mean().sort_values(ascending=False).plot.bar(ax=axarr[0][1], fontsize=12)
+axarr[0][1].set_title("Transmission Vs Price", fontsize=18)
+data.groupby('Fuel_Type')['Price_log'].mean().sort_values(ascending=False).plot.bar(ax=axarr[1][0], fontsize=12)
+axarr[1][0].set_title("Fuel_Type Vs Price", fontsize=18)
+data.groupby('Owner_Type')['Price_log'].mean().sort_values(ascending=False).plot.bar(ax=axarr[1][1], fontsize=12)
+axarr[1][1].set_title("Owner_Type Vs Price", fontsize=18)
+data.groupby('Brand')['Price_log'].mean().sort_values(ascending=False).head(10).plot.bar(ax=axarr[2][0], fontsize=12)
+axarr[2][0].set_title("Brand Vs Price", fontsize=18)
+data.groupby('Model')['Price_log'].mean().sort_values(ascending=False).head(10).plot.bar(ax=axarr[2][1], fontsize=12)
+axarr[2][1].set_title("Model Vs Price", fontsize=18)
+data.groupby('Seats')['Price_log'].mean().sort_values(ascending=False).plot.bar(ax=axarr[3][0], fontsize=12)
+axarr[3][0].set_title("Seats Vs Price", fontsize=18)
+data.groupby('Car_Age')['Price_log'].mean().sort_values(ascending=False).plot.bar(ax=axarr[3][1], fontsize=12)
+axarr[3][1].set_title("Car_Age Vs Price", fontsize=18)
+plt.subplots_adjust(hspace=1.0)
+plt.subplots_adjust(wspace=.5)
+sns.despine()
+
+
+Step 12: EDA Multivariate Analysis
+As the name suggests, Multivariate analysis looks at more than two variables. Multivariate analysis is one of the most useful methods to determine relationships and analyze patterns for any dataset.
+A heat map is widely been used for Multivariate Analysis
+Heat Map gives the correlation between the variables, whether it has a positive or negative correlation.
+In our example heat map shows the correlation between the variables.
+
+plt.figure(figsize=(12, 7))
+sns.heatmap(data.drop(['Kilometers_Driven','Price'],axis=1).corr(), annot = True, vmin = -1, vmax = 1)
+plt.show()
+
+From the Heat map, we can infer the following:
+The engine has a strong positive correlation to Power 0.86
+Price has a positive correlation to Engine 0.69 as well Power 0.77
+Mileage has correlated to Engine, Power, and Price negatively
+Price is moderately positive in correlation to year.
+Kilometer driven has a negative correlation to year not much impact on the price
+Car age has a negative correlation with Price
+Car age positively correlates with kilometers driven, as the age of the car increases, the kilometers driven also increase. 
+In contrast, car age negatively correlates with mileage, which makes sense.
+
+Step 13: Impute Missing values
+Missing data arise in almost all statistical analyses. There are many ways to impute missing values; we can impute the missing values by their Mean, median, most frequent, or zero values and use advanced imputation algorithms like KNN, Regularization, etc.
+We cannot impute the data with a simple Mean/Median. We must need business knowledge or common insights about the data. If we have domain knowledge, it will add value to the imputation. Some data can be imputed on assumptions.
+In our dataset, we have found there are missing values for many columns like Mileage, Power, and Seats.
+
+We observed earlier some observations have zero Mileage. This looks like a data entry issue. We can fix this by filling null values with zero and then using the mean value of Mileage, since the mean and median values are nearly the same for this variable. Therefore, you choose the mean to impute the values.
+
+data.loc[data["Mileage"]==0.0,'Mileage']=np.nan
+data.Mileage.isnull().sum()
+data['Mileage'].fillna(value=np.mean(data['Mileage']),inplace=True)
+Similarly, imputation for Seats. As we mentioned earlier, we need to know common insights about the data.
+
+Let’s assume some cars brand and Models have features like Engine, Mileage, Power, and Number of seats that are nearly the same. Let’s impute those missing values with the existing data:
+
+data.Seats.isnull().sum()
+data['Seats'].fillna(value=np.nan,inplace=True)
+data['Seats']=data.groupby(['Model','Brand'])['Seats'].apply(lambda x:x.fillna(x.median()))
+data['Engine']=data.groupby(['Brand','Model'])['Engine'].apply(lambda x:x.fillna(x.median()))
+data['Power']=data.groupby(['Brand','Model'])['Power'].apply(lambda x:x.fillna(x.median()))
+In general, there are no defined or perfect rules for imputing missing values in a dataset. 
+Each method can perform better for some datasets but may perform even worse. 
+Only practice and experiments give the knowledge which works better.
