@@ -1,0 +1,44 @@
+Step 1: Import Python Libraries
+The first step involved in ML using python is understanding and playing around with our data using libraries.
+
+Import all libraries required for our analysis, such as those for data loading, statistical analysis, visualizations, data transformations, and merging and joining.
+
+Pandas and Numpy have been used for Data Manipulation and numerical Calculations:
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+#to ignore warnings
+import warnings
+warnings.filterwarnings('ignore')
+
+Step 2: Reading Dataset
+The Pandas library offers a wide range of possibilities for loading data into the pandas DataFrame from files like JSON, .csv, .xlsx, .sql, .pickle, .html, .txt, images etc.
+Most of the data are available in a tabular format of CSV files. It is trendy and easy to access. Using the read_csv() function, data can be converted to a pandas DataFrame.
+
+In this project, the data to predict Used car price is being used. In this dataset, we are trying to analyze the used car’s price and how EDA focuses on identifying the factors influencing the car price. We have stored the data in the DataFrame data.
+data = pd.read_csv("used_cars.csv")
+  
+Analyzing the Data
+Before we make any inferences, we listen to our data by examining all variables in the data.
+The main goal of data understanding is to gain general insights about the data, which covers the number of rows and columns, values in the data, datatypes, and Missing values in the dataset.
+shape – shape will display the number of observations(rows) and features(columns) in the dataset
+There are 7253 observations and 14 variables in our dataset
+head() will display the top 5 observations of the dataset
+data.head()
+tail() will display the last 5 observations of the dataset
+data.tail()
+nfo() helps to understand the data type and information about data, including the number of records in each column, data having null or not null, Data type, the memory usage of the dataset
+data.info()  
+data.info() shows the variables Mileage, Engine, Power, Seats, New_Price, and Price have missing values. Numeric variables like Mileage, Power are of datatype as  float64 and int64. Categorical variables like Location, Fuel_Type, Transmission, and Owner Type are of object data type  
+Check for Duplication
+nunique() based on several unique values in each column and the data description, we can identify the continuous and categorical columns in the data. Duplicated data can be handled or removed based on further analysis
+data.nunique() 
+Missing Values Calculation: 
+isnull() is widely been in all pre-processing steps to identify null values in the data
+In our example, data.isnull().sum() is used to get the number of missing records in each column
+data.isnull().sum()  
+The below code helps to calculate the percentage of missing values in each column
+(data.isnull().sum()/(len(data)))*100  
+
+The percentage of missing values for the columns New_Price and Price is ~86% and ~17%, respectively.
